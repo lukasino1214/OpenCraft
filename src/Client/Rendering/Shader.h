@@ -20,6 +20,7 @@ public:
     void Bind() const;
     void Unbind() const;
 
+    void SetInt(const std::string& name, const uint32_t value);
     void SetFloat3(const std::string& name, const glm::vec3& value);
     void SetMat4(const std::string &name, const glm::mat4 &value);
 

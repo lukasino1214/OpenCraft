@@ -10,9 +10,29 @@
 #include <vector>
 #include <glad/glad.h>
 
+std::string get_file_contents(const std::string& file)
+{
+    std::ifstream in(file, std::ios::binary);
+    if (in)
+    {
+        std::string contents;
+        in.seekg(0, std::ios::end);
+        contents.resize(in.tellg());
+        in.seekg(0, std::ios::beg);
+        in.read(&contents[0], contents.size());
+        in.close();
+        return(contents);
+    }
+    throw(errno);
+}
+
 Shader::Shader(const std::string &vertexSrc, const std::string &fragmentSrc) {
-    auto c_strVertex = vertexSrc.c_str();
-    auto c_strFragment = fragmentSrc.c_str();
+
+    auto vertexContent = get_file_contents(vertexSrc);
+    auto fragementContent = get_file_contents(fragmentSrc);
+
+    auto c_strVertex = vertexContent.c_str();
+    auto c_strFragment = fragementContent.c_str();
 
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &c_strVertex, NULL);
@@ -71,4 +91,9 @@ void Shader::SetFloat3(const std::string& name, const glm::vec3& value) {
 void Shader::SetMat4(const std::string &name, const glm::mat4 &value) {
     GLint location = glGetUniformLocation(m_RendererID, name.c_str());
     glProgramUniformMatrix4fv(m_RendererID, location, 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void Shader::SetInt(const std::string& name, const uint32_t value) {
+    GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+    glProgramUniform1i(m_RendererID, location, value);
 }

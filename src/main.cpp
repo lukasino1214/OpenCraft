@@ -13,7 +13,8 @@
 #define TRACY_ENABLE
 #include "Tracy/Tracy.hpp"
 #include "glm/gtx/hash.hpp"
-
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 void message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, GLchar const* message, void const* user_param)
 {
     auto const src_str = [source]() {
@@ -138,7 +139,6 @@ int main()
     )";
 
     //ShaderClass shader(vertexSource, fragmentSource);
-    Shader shader(vertexSource, fragmentSource);
 
     /*uint32_t fbo, tex, depthTex;
 
@@ -192,10 +192,28 @@ int main()
             4, 5, 0, 0, 5, 1
     };
 
-    /*auto fnSimplex = FastNoise::New<FastNoise::Simplex>();
-    auto fnFractal = FastNoise::New<FastNoise::FractalFBm>();
-    fnFractal->SetSource( fnSimplex );
-    fnFractal->SetOctaveCount( 5 );*/
+    uint32_t  m_vbo, m_ibo, m_vao;
+
+    glCreateBuffers(1, &m_vbo);
+    glNamedBufferStorage(m_vbo, ver.size() * sizeof(float), &ver[0], 0);
+
+    glCreateBuffers(1, &m_ibo);
+    glNamedBufferStorage(m_ibo, ind.size() * sizeof(uint32_t), &ind[0], 0);
+
+    glCreateVertexArrays(1, &m_vao);
+    glBindVertexArray(m_vao);
+
+    struct vertex { glm::vec3 pos, nrm; };
+
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, offsetof(vertex, pos));
+
+    glVertexAttribBinding(0, 0);
+
+
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(m_vao, m_ibo);
 
     auto OpenSimplex = FastNoise::New<FastNoise::OpenSimplex2>();
     auto FractalFBm = FastNoise::New<FastNoise::FractalFBm>();
@@ -217,26 +235,126 @@ int main()
 
     ChunkManager manager(add);
 
-    for(int x = -1; x < 0; x++) {
-        for(int y = -1; y < 0; y++) {
-            for(int z = -1; z < 0; z++) {
+    for(int x = -4; x < 5; x++) {
+        for(int y = -1; y < 1; y++) {
+            for(int z = -4; z < 5; z++) {
                 manager.AddChunk({x,y,z});
             }
         }
     }
-    //manager.AddChunk({1,1,1});
-    /*std::vector<float> noiseOutput(16 * 16 * 16);
-    add->GenUniformGrid3D(noiseOutput.data(), 16 * 1, 16 * 1, 16 * 1, 16, 16, 16, 0.05f, 1337);
+
+    /*unsigned int texture1;
+    // texture 1
+    // ---------
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    std::string path = "res/Textures/container.jpg";
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);*/
+
+    uint32_t array;
+    glGenTextures( 1, &array );
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, array);
+
+  //Create storage for the texture. (100 layers of 1x1 texels)
+    glTexStorage3D( GL_TEXTURE_2D_ARRAY,
+                  1,                    //No mipmaps as textures are 1x1
+                  GL_RGB8,              //Internal format
+                  16, 16,                 //width,height
+                  100                   //Number of layers
+                );
+
+    int width, height, nrChannels;
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    std::string path = "res/Textures/1.jpg";
+    unsigned char *data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexSubImage3D( GL_TEXTURE_2D_ARRAY,
+                         0,                     //Mipmap number
+                         0,0,0,                 //xoffset, yoffset, zoffset
+                         16,16,1,                 //width, height, depth
+                         GL_RGB,                //format
+                         GL_UNSIGNED_BYTE,      //type
+                         data);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    path = "res/Textures/3.jpg";
+
+    data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexSubImage3D( GL_TEXTURE_2D_ARRAY,
+                         0,                     //Mipmap number
+                         0,0,1,                 //xoffset, yoffset, zoffset
+                         16,16,1,                 //width, height, depth
+                         GL_RGB,                //format
+                         GL_UNSIGNED_BYTE,      //type
+                         data);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
+    path = "res/Textures/4.png";
+
+    data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glTexSubImage3D( GL_TEXTURE_2D_ARRAY,
+                         0,                     //Mipmap number
+                         0,0,2,                 //xoffset, yoffset, zoffset
+                         16,16,1,                 //width, height, depth
+                         GL_RGB,                //format
+                         GL_UNSIGNED_BYTE,      //type
+                         data);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
 
 
-    Chunk chunk({1,1,1}, noiseOutput);*/
-
-
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, {18,18, 18});
 
-    shader.SetMat4("projection", camera.GetProjection());
-
+    Shader sky("res/Shader/Atmo.vert", "res/Shader/Atmo.frag");
+    sky.Unbind();
+    Shader shader("res/Shader/Cube.vert", "res/Shader/Cube.frag");
+    //Shader atmo("res/Shader/Cube.vert", "res/Shader/Cube.frag");
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
@@ -245,12 +363,28 @@ int main()
         glClearBufferfv(GL_COLOR, 0, m_clear_color.data());
         glClearBufferfi(GL_DEPTH_STENCIL, 0, 1.0, 0);
         camera.Inputs(window);
+
+        //std::cout << glm::to_string(camera.GetPosition()) << std::endl;
+
+        sky.Bind();
+        sky.SetMat4("projection", camera.GetProjection());
+        sky.SetMat4("view", camera.GetView());
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
+        model = glm::scale(glm::mat4(1.0f), {500.0f, 500.0f, 500.0f});
+        sky.SetMat4("model", model);
+        glBindVertexArray(m_vao);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+        sky.Unbind();
         shader.Bind();
+        shader.SetMat4("projection", camera.GetProjection());
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, array);
+        shader.SetInt("texture", array);
         //shader.SetFloat3("color", {0.9f, 0.9f, 0.9f});
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, {0.0f, 0.0f, 0.0f});
+        model = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
         shader.SetMat4("view", camera.GetView());
         manager.Render(shader);
+        shader.Unbind();
         //chunk.Render(shader);
         /*glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBlitNamedFramebuffer(fbo, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, GL_COLOR_BUFFER_BIT, GL_LINEAR);*/
@@ -273,3 +407,48 @@ void processInput(GLFWwindow *window) {
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
+
+float vertices[] = {
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+};

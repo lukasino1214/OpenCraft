@@ -29,6 +29,12 @@ public:
 
 
         Chunk chunk(pos, noiseOutput);
+        /*chunk.neighbors.px = &m_Chunks[{pos.x + 1, pos.y, pos.z}];
+        chunk.neighbors.py = &m_Chunks[{pos.x, pos.y + 1, pos.z}];
+        chunk.neighbors.pz = &m_Chunks[{pos.x, pos.y, pos.z + 1}];
+        chunk.neighbors.nx = &m_Chunks[{pos.x - 1, pos.y, pos.z}];
+        chunk.neighbors.ny = &m_Chunks[{pos.x, pos.y - 1, pos.z}];
+        chunk.neighbors.nz = &m_Chunks[{pos.x, pos.y, pos.z - 1}];*/
         m_Chunks.insert(std::pair<glm::ivec3, Chunk>(pos, chunk));
         //m_Chunks.push_back(chunk);
     }

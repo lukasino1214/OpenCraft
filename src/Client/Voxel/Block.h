@@ -10,7 +10,10 @@
 enum class BlockID : uint32_t
 {
     Air,
-    Dirt
+    Solid,
+    Grass,
+    Dirt,
+    Stone
 };
 
 struct Block {
@@ -20,6 +23,13 @@ struct Block {
         switch (id) {
             case BlockID::Air:
             default: return false;
+        }
+    }
+
+    bool is_solid() const {
+        switch (id) {
+            case BlockID::Air: return false;
+            default: return true;
         }
     }
 };
