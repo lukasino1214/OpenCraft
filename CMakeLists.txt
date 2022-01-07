@@ -27,8 +27,11 @@ add_executable(OpenCraft
         src/Client/Rendering/Buffers.cpp
         src/Client/Rendering/Camera.cpp 
         src/Client/Rendering/Shader.cpp
+        src/Client/Rendering/util.h
         src/Client/Rendering/VertexArray.cpp
+        src/Client/Rendering/TextureArray.h
         src/Client/Voxel/Block.h
+        src/Client/Voxel/Cube.h
         src/Client/Voxel/Chunk.cpp
         src/Client/Voxel/ChunkManager.cpp
         src/Tracy/TracyClient.cpp

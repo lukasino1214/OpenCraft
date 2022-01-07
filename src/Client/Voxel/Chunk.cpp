@@ -95,6 +95,8 @@ Chunk::Chunk(const glm::ivec3& position, const std::vector<float>& noise) : pos(
 
     int i = 0;
 
+    float id = 0.0f;
+
     uint32_t vertexIndex = 0;
     for(int x = 0; x < 16; x++) {
         for(int y = 0; y < 16; y++) {
@@ -105,107 +107,45 @@ Chunk::Chunk(const glm::ivec3& position, const std::vector<float>& noise) : pos(
                     float g = RandomFloat(0.0f, 1.0f);
                     float b = RandomFloat(0.0f, 1.0f);
                     glm::vec3 color = {r, g, b};
-                    float id = (float)GetID({x, y, z});
-
-                    /*std::vector<float> newVoxelVerticies = {
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z, color.x, color.y, color.z,
-                            0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z, color.x, color.y, color.z,
-                            0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z, color.x, color.y, color.z,
-                            -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z, color.x, color.y, color.z,
-                            -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z, color.x, color.y, color.z,
-                            0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z, color.x, color.y, color.z,
-                            0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z, color.x, color.y, color.z,
-                            -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z, color.x, color.y, color.z
-                    };*/
-
-                    /*std::vector<float> bruh = {
-                            // position                                                 colors                           normals                   tex coords
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       0.0f,  0.0f, // -z
-                             0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       1.0f,  0.0f,
-                             0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       1.0f,  1.0f,
-                             0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       1.0f,  1.0f,
-                            -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       0.0f,  1.0f,
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       0.0f,  0.0f,
-
-                            -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       0.0f,  0.0f, //+z
-                             0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       1.0f,  0.0f,
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       1.0f,  1.0f,
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       1.0f,  1.0f,
-                            -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       0.0f,  1.0f,
-                            -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f,  1.0f,       0.0f,  0.0f,
-
-                            -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f,//-x
-                            -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  1.0f,
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f,
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f,
-                            -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  0.0f,
-                            -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f,
-
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f, //+x
-                             0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  1.0f,
-                             0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f,
-                             0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f,
-                             0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  0.0f,
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f,
-
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       0.0f,  1.0f, //-y
-                             0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       1.0f,  1.0f,
-                             0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       1.0f,  0.0f,
-                             0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       1.0f,  0.0f,
-                            -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       0.0f,  0.0f,
-                            -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f, -1.0f,  0.0f,       0.0f,  1.0f,
-
-                            -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       0.0f,  1.0f, //+y
-                             0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       1.0f,  1.0f,
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       1.0f,  0.0f,
-                             0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       1.0f,  0.0f,
-                            -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       0.0f,  0.0f,
-                            -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  1.0f,  0.0f,       0.0f,  1.0f
-                    };*/
-
-                    //vertices.insert(vertices.begin(), std::begin(newVoxelVerticies), std::end(newVoxelVerticies));
-                    //vertices.insert(vertices.begin(), std::begin(bruh), std::end(bruh));
-
-                    /*uint32_t back_face1[6]    = {vertexIndex + 0, vertexIndex + 1, vertexIndex + 3, vertexIndex + 3, vertexIndex + 1, vertexIndex + 2};
-                    uint32_t left_face1[6]    = {vertexIndex + 1, vertexIndex + 5, vertexIndex + 2, vertexIndex + 2, vertexIndex + 5, vertexIndex + 6};
-                    uint32_t forward_face1[6] = {vertexIndex + 5, vertexIndex + 4, vertexIndex + 6, vertexIndex + 6, vertexIndex + 4, vertexIndex + 7};
-                    uint32_t right_face1[6]   = {vertexIndex + 4, vertexIndex + 0, vertexIndex + 7, vertexIndex + 7, vertexIndex + 0, vertexIndex + 3};
-                    uint32_t up_face1[6]      = {vertexIndex + 3, vertexIndex + 2, vertexIndex + 7, vertexIndex + 7, vertexIndex + 2, vertexIndex + 6};
-                    uint32_t down_face1[6]    = {vertexIndex + 4, vertexIndex + 5, vertexIndex + 0, vertexIndex + 0, vertexIndex + 5, vertexIndex + 1};
-                    indices.insert(indices.begin(), back_face1, back_face1 + 6);
-                    indices.insert(indices.begin(), left_face1, left_face1 + 6);
-                    indices.insert(indices.begin(), forward_face1, forward_face1 + 6);
-                    indices.insert(indices.begin(), right_face1, right_face1 + 6);
-                    indices.insert(indices.begin(), up_face1, up_face1 + 6);
-                    indices.insert(indices.begin(), down_face1, down_face1 + 6);*/
+                    id = (float)GetID({x, y, z});
+                    if(GetBlockID({x,y,z}) == BlockID::Grass) {
+                        id = (float)1;
+                    }
 
                     i++;
-                    std::cout << std::endl;
+                    //std::cout << std::endl;
                     if(GetBlockID({x-1,y,z}) == BlockID::Air) {
                         //std::cout << "x-  " << "CHAD   " << i << "  x: " << x << " y: "  << y << " z: " << z << std::endl;
                         std::vector<float> face = {
-                                -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id, //-x
+                                -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id, //-x
                                 -0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  1.0f, id,
-                                -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
-                                -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
+                                -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
+                                -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
                                 -0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  0.0f, id,
-                                -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
+                                -0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,      -1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
                         };
                         vertices.insert(vertices.begin(), std::begin(face), std::end(face));
+                    }
+
+                    id = (float)GetID({x, y, z});
+                    if(GetBlockID({x,y,z}) == BlockID::Grass) {
+                        id = (float)1;
                     }
 
                     if(GetBlockID({x+1,y,z}) == BlockID::Air) {
                         //std::cout << "x+  " << "CHAD   " << i << "  x: " << x << " y: "  << y << " z: " << z << std::endl;
                         std::vector<float> face = {
-                                0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id, //+x
+                                0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id, //+x
                                 0.5f + (float)x,  0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  1.0f, id,
-                                0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
-                                0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
+                                0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
+                                0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
                                 0.5f + (float)x, -0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  0.0f, id,
-                                0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       1.0f,  0.0f, id,
+                                0.5f + (float)x,  0.5f + (float)y,  0.5f + (float)z,       color.x, color.y, color.z,       1.0f,  0.0f,  0.0f,       0.0f,  1.0f, id,
                         };
                         vertices.insert(vertices.begin(), std::begin(face), std::end(face));
                     }
+
+                    id = (float)GetID({x, y, z});
 
                     if(GetBlockID({x,y-1,z}) == BlockID::Air) {
                         //std::cout << "y-  " << "CHAD   " << i << "  x: " << x << " y: "  << y << " z: " << z << std::endl;
@@ -221,6 +161,8 @@ Chunk::Chunk(const glm::ivec3& position, const std::vector<float>& noise) : pos(
 
                     }
 
+                    id = (float)GetID({x, y, z});
+
                     if(GetBlockID({x,y+1,z}) == BlockID::Air) {
                         //std::cout << "y+  " << "CHAD   " << i << "  x: " << x << " y: "  << y << " z: " << z << std::endl;
                         std::vector<float> face = {
@@ -234,6 +176,11 @@ Chunk::Chunk(const glm::ivec3& position, const std::vector<float>& noise) : pos(
                         vertices.insert(vertices.begin(), std::begin(face), std::end(face));
                     }
 
+                    id = (float)GetID({x, y, z});
+                    if(GetBlockID({x,y,z}) == BlockID::Grass) {
+                        id = (float)1;
+                    }
+
                     if(GetBlockID({x,y,z-1}) == BlockID::Air) {
                         //std::cout << "z-  " << "CHAD   " << i << "  x: " << x << " y: "  << y << " z: " << z << std::endl;
                         std::vector<float> face = {
@@ -245,6 +192,11 @@ Chunk::Chunk(const glm::ivec3& position, const std::vector<float>& noise) : pos(
                                 -0.5f + (float)x, -0.5f + (float)y, -0.5f + (float)z,       color.x, color.y, color.z,       0.0f,  0.0f, -1.0f,       0.0f,  0.0f, id,
                         };
                         vertices.insert(vertices.begin(), std::begin(face), std::end(face));
+                    }
+
+                    id = (float)GetID({x, y, z});
+                    if(GetBlockID({x,y,z}) == BlockID::Grass) {
+                        id = (float)1;
                     }
 
                     if(GetBlockID({x,y,z+1}) == BlockID::Air) {

@@ -59,12 +59,12 @@ public:
     uint32_t GetID(const glm::ivec3& pos) {
         if(-1 < pos.x && pos.x < 16 && -1 < pos.y && pos.y < 16 && -1 < pos.z && pos.z < 16) {
             if(m_VoxelData[pos.x][pos.y][pos.z].id == BlockID::Stone) {
-                return 2;
+                return 3;
             } else if(m_VoxelData[pos.x][pos.y][pos.z].id == BlockID::Grass) {
                 return 0;
             }
             else if(m_VoxelData[pos.x][pos.y][pos.z].id == BlockID::Dirt) {
-                return 1;
+                return 2;
             }
         }
 
