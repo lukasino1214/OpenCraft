@@ -55,7 +55,8 @@ public:
     }
 
     void Bind() {
-        glBindTexture(GL_TEXTURE_2D_ARRAY, array);
+        //glBindTexture(GL_TEXTURE_2D_ARRAY, array);
+        glBindTextureUnit(0, array);
     }
 
     uint32_t GetID() { return array; }
